@@ -1,3 +1,3 @@
-export function test(req, res) {
-  res.json({ message: 'API is working' });
+export function getUser(req, res) {
+  res.json({ message: 'User route is working' });
 }
