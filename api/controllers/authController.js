@@ -1,6 +1,7 @@
+import { errorHandler } from '../lib/error.js';
 import User from '../models/userModel.js';
 
-export async function signUp(req, res) {
+export async function signUp(req, res, next) {
   // const { username, email, password } = req.body;
 
   // const newUser = new User({ username, email, password });
@@ -10,6 +11,7 @@ export async function signUp(req, res) {
 
     res.status(201).json({ message: 'User successfully created', user });
   } catch (error) {
-    res.status(500).json(error.message);
+    // next(errorHandler(300, 'something went wrong'));  //custom error example
+    next(error);
   }
 }
