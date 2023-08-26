@@ -1,73 +1,105 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const formSchema = z.object({
+  username: z.string().min(4, 'Username must be at least 4 characters'),
+  email: z.string().email(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 export default function SignUpPage() {
-  const [formData, setFormData] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    formState: { errors, isSubmitting },
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+    },
+    mode: 'all',
+    resolver: zodResolver(formSchema),
+  });
+
   const [error, setError] = useState(false);
 
-  function handleInputChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  }
-
-  async function handleFormSubmit(e) {
-    e.preventDefault();
+  async function onSubmit(data) {
+    console.log(data);
     try {
-      setIsLoading(true);
       setError(false);
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
-      setIsLoading(false);
+      const userData = await res.json();
+      console.log(userData);
 
-      if (data.success === false) {
+      if (userData.success === false) {
         setError(true);
+        reset();
         return;
       }
+      reset();
     } catch (error) {
-      setIsLoading(false);
+      console.log(error);
     }
   }
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-10'>Sign Up</h1>
-      <form onSubmit={handleFormSubmit} className='flex flex-col gap-4'>
+      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
         <input
           type='text'
           placeholder='Username'
           id='username'
           className='bg-slate-100 p-3 rounded-lg'
-          onChange={handleInputChange}
+          {...register('username')}
+         
         />
+        {errors.username?.message && (
+          <p className='text-sm text-red-400 -mt-2'>
+            {errors.username.message}
+          </p>
+        )}
         <input
           type='email'
           placeholder='Email'
           id='email'
           className='bg-slate-100 p-3 rounded-lg'
-          onChange={handleInputChange}
+          {...register('email')}
+         
         />
+        {errors.email?.message && (
+          <p className='text-sm text-red-400 -mt-2'>{errors.email.message}</p>
+        )}
         <input
           type='password'
           placeholder='Password'
           id='password'
           className='bg-slate-100 p-3 rounded-lg'
-          onChange={handleInputChange}
+          {...register('password')}
+         
         />
+        {errors.password?.message && (
+          <p className='text-sm text-red-400 -mt-2'>
+            {errors.password.message}
+          </p>
+        )}
         <button
-          disabled={isLoading}
+          disabled={isSubmitting}
           className='bg-slate-700 text-white p-3 rounded-lg uppercase transition duration-250 hover:opacity-95 disabled:opacity-80'
         >
-          {isLoading ? 'Loading...' : 'Sign Up'}
+          {isSubmitting ? 'Loading...' : 'Sign Up'}
         </button>
       </form>
       <div className='flex gap-2 mt-5'>
