@@ -29,7 +29,6 @@ export default function SignUpPage() {
   const [error, setError] = useState(false);
 
   async function onSubmit(data) {
-    console.log(data);
     try {
       setError(false);
       const res = await fetch('/api/auth/signup', {
@@ -41,7 +40,6 @@ export default function SignUpPage() {
       });
 
       const userData = await res.json();
-      console.log(userData);
 
       if (userData.success === false) {
         setError(true);
@@ -64,7 +62,6 @@ export default function SignUpPage() {
           id='username'
           className='bg-slate-100 p-3 rounded-lg'
           {...register('username')}
-         
         />
         {errors.username?.message && (
           <p className='text-sm text-red-400 -mt-2'>
@@ -77,7 +74,6 @@ export default function SignUpPage() {
           id='email'
           className='bg-slate-100 p-3 rounded-lg'
           {...register('email')}
-         
         />
         {errors.email?.message && (
           <p className='text-sm text-red-400 -mt-2'>{errors.email.message}</p>
@@ -88,7 +84,6 @@ export default function SignUpPage() {
           id='password'
           className='bg-slate-100 p-3 rounded-lg'
           {...register('password')}
-         
         />
         {errors.password?.message && (
           <p className='text-sm text-red-400 -mt-2'>
