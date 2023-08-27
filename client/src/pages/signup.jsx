@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,7 @@ const formSchema = z.object({
 });
 
 export default function SignUpPage() {
+  const navigate = useNavigate();
   const {
     formState: { errors, isSubmitting },
     register,
@@ -47,6 +48,7 @@ export default function SignUpPage() {
         return;
       }
       reset();
+      navigate('/sign-in');
     } catch (error) {
       console.log(error);
     }
