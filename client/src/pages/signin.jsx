@@ -3,6 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from '../redux/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -11,6 +17,7 @@ const formSchema = z.object({
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     formState: { errors, isSubmitting },
     register,
@@ -25,11 +32,13 @@ export default function SignInPage() {
     resolver: zodResolver(formSchema),
   });
 
-  const [error, setError] = useState(false);
+  const { error } = useSelector((state) => state.user);
+  // const [error, setError] = useState(false);
 
   async function onSubmit(data) {
     try {
-      setError(false);
+      dispatch(signInStart());
+      // setError(false);
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -40,15 +49,27 @@ export default function SignInPage() {
 
       const userData = await res.json();
 
-      if (userData.success === false) {
-        setError(true);
+      console.log(userData);
+
+      if (userData.statusCode === 500) {
+        dispatch(
+          signInFailure('Internal server error. Could not fetch the data.')
+        );
+
         reset();
         return;
       }
+      if (userData.success === false) {
+        dispatch(signInFailure(userData.error));
+        reset();
+        return;
+      }
+      dispatch(signInSuccess(userData));
       reset();
       navigate('/');
     } catch (error) {
       console.log(error);
+      dispatch(signInFailure(error));
     }
   }
 
@@ -92,7 +113,7 @@ export default function SignInPage() {
         </Link>
       </div>
       <p className='text-red-700 mt-5'>
-        {error && 'Oops something went wrong!'}
+        {error ? error || 'Oops something went wrong' : ''}
       </p>
     </div>
   );
