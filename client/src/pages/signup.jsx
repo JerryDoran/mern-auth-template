@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import OAuth from '../components/OAuth';
 
 const formSchema = z.object({
   username: z.string().min(4, 'Username must be at least 4 characters'),
@@ -98,6 +99,7 @@ export default function SignUpPage() {
         >
           {isSubmitting ? 'Loading...' : 'Sign Up'}
         </button>
+        <OAuth />
       </form>
       <div className='flex gap-2 mt-5'>
         <p>Have an account?</p>

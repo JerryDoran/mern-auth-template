@@ -8,6 +8,7 @@ import {
   signInFailure,
 } from '../redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import OAuth from '../components/OAuth';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -104,6 +105,7 @@ export default function SignInPage() {
         >
           {isSubmitting ? 'Loading...' : 'Sign In'}
         </button>
+        <OAuth />
       </form>
       <div className='flex gap-2 mt-5'>
         <p>Don&apos;t have an account?</p>

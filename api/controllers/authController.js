@@ -50,3 +50,50 @@ export async function signIn(req, res, next) {
     next(error);
   }
 }
+export async function signUpWithGoogle(req, res, next) {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+      // Block password from being returned from the request for the client side
+      const { password: hashedPassword, ...rest } = user._doc;
+
+      // Add expiry date to the session
+      const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+      res
+        .cookie('access_token', token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest);
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8); // generates 16 characters
+
+      const newUser = await User.create({
+        username:
+          req.body.name.split(' ').join('').toLowerCase() +
+          Math.floor(Math.random() * 10000).toString(),
+        email: req.body.email,
+        password: generatedPassword,
+        profilePicture: req.body.photo,
+      });
+      console.log(newUser);
+
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      console.log(token);
+
+      // Block password from being returned from the request for the client side
+      const { password: hashedPasswordNewUser, ...rest } = newUser._doc;
+
+      // Add expiry date to the session
+      const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+      res
+        .cookie('access_token', token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest);
+    }
+  } catch (error) {
+    next(error);
+  }
+}
