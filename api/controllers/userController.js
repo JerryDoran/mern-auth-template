@@ -1,3 +1,37 @@
+import { errorHandler } from '../lib/error.js';
+import bcrypt from 'bcryptjs';
+import User from '../models/userModel.js';
+
 export function getUser(req, res) {
   res.json({ message: 'User route is working' });
+}
+
+export async function updateUser(req, res, next) {
+  if (req.user.id !== req.params.id) {
+    // return res.status(401).json('You can only update your account');
+    return next(errorHandler(401, 'You can only update your account'));
+  }
+  try {
+    if (req.body.password) {
+      req.body.password = bcrypt.hashSync(req.body.password, 12);
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          profilePicture: req.body.profilePicture,
+        },
+      },
+      // this gives me the new updated user
+      { new: true }
+    );
+    // separate out the password from the response
+    const { password, ...rest } = updatedUser._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
 }
