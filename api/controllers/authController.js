@@ -50,6 +50,7 @@ export async function signIn(req, res, next) {
     next(error);
   }
 }
+
 export async function signUpWithGoogle(req, res, next) {
   try {
     const user = await User.findOne({ email: req.body.email });

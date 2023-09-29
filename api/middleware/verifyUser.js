@@ -15,6 +15,7 @@ export function verifyToken(req, res, next) {
       return next(errorHandler(403, 'Token is not valid!'));
     }
 
+    // The user will be added to the req object and will be available to the next function updateUser
     req.user = user;
     next();
   });

@@ -32,7 +32,8 @@ export default function SignInPage() {
     resolver: zodResolver(formSchema),
   });
 
-  const { error } = useSelector((state) => state.user);
+  const { error, loading } = useSelector((state) => state.user);
+  console.log(error);
   // const [error, setError] = useState(false);
 
   async function onSubmit(data) {
@@ -48,7 +49,6 @@ export default function SignInPage() {
       });
 
       const userData = await res.json();
-
       console.log(userData);
 
       if (userData.statusCode === 500) {
@@ -113,9 +113,9 @@ export default function SignInPage() {
           <span className='text-blue-500 underline'>Sign up</span>
         </Link>
       </div>
-      <p className='text-red-700 mt-5'>
+      {/* <p className='text-red-700 mt-5'>
         {error ? error || 'Oops something went wrong' : ''}
-      </p>
+      </p> */}
     </div>
   );
 }

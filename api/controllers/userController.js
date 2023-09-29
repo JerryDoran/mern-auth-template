@@ -1,5 +1,5 @@
 import { errorHandler } from '../lib/error.js';
-import bcrypt from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 import User from '../models/userModel.js';
 
 export function getUser(req, res) {
@@ -13,7 +13,7 @@ export async function updateUser(req, res, next) {
   }
   try {
     if (req.body.password) {
-      req.body.password = bcrypt.hashSync(req.body.password, 12);
+      req.body.password = bcryptjs.hashSync(req.body.password, 12);
     }
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
@@ -30,7 +30,7 @@ export async function updateUser(req, res, next) {
     );
     // separate out the password from the response
     const { password, ...rest } = updatedUser._doc;
-    res.status(200).json(rest);
+    res.status(200).json({ success: true, ...rest });
   } catch (error) {
     next(error);
   }

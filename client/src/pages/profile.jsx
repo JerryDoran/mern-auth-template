@@ -2,22 +2,30 @@ import { useSelector } from 'react-redux';
 import { useEffect, useRef, useState } from 'react';
 import { storage } from '../firebase.config';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useDispatch } from 'react-redux';
+import {
+  updateUserStart,
+  updateUserFailure,
+  updateUserSuccess,
+} from '../redux/user/userSlice';
 
 export default function ProfilePage() {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const [image, setImage] = useState(undefined);
   const [imagePercent, setImagePercent] = useState(0);
   const [uploadError, setUploadError] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   const [formData, setFormData] = useState({});
   const fileRef = useRef(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (image) {
-      handleFileUpload();
+      handleFileUpload(image);
     }
   }, [image]);
 
-  async function handleFileUpload() {
+  async function handleFileUpload(image) {
     setUploadError(false);
     const fileName = new Date().getTime() + image.name;
     const storageRef = ref(storage, `images/${fileName}`);
@@ -40,10 +48,42 @@ export default function ProfilePage() {
       }
     );
   }
+
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(updateUserFailure(data));
+        return;
+      }
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (error) {
+      dispatch(updateUserFailure(error));
+    }
+  }
+
   return (
     <div className='pt-10 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center'>Profile</h1>
-      <form className='flex flex-col gap-4 p-7'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4 p-7'>
         <input
           type='file'
           ref={fileRef}
@@ -74,6 +114,7 @@ export default function ProfilePage() {
           placeholder='Username'
           defaultValue={currentUser.username}
           className='bg-slate-100 p-3 rounded-lg'
+          onChange={handleChange}
         />
         <input
           type='email'
@@ -81,25 +122,33 @@ export default function ProfilePage() {
           placeholder='Email'
           defaultValue={currentUser.email}
           className='bg-slate-100 p-3 rounded-lg'
+          onChange={handleChange}
         />
         <input
           type='password'
           id='password'
           placeholder='Password'
           className='bg-slate-100 p-3 rounded-lg'
+          onChange={handleChange}
         />
         <button className='bg-slate-700 text-white p-3 transition rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>
-          Update
+          {loading ? 'Loading...' : 'Update'}
         </button>
       </form>
       <div className='flex justify-between max-w-lg px-7'>
-        <span className='text-red-700 cursor-pointer transition p-2 rounded-lg hover:bg-slate-100'>
+        <span className='text-red-700 cursor-pointer transition py-2 rounded-lg hover:bg-slate-100'>
           Delete Account
         </span>
-        <span className='text-red-700 cursor-pointer transition p-2 rounded-lg hover:bg-slate-100'>
+        <span className='text-red-700 cursor-pointer transition py-2 rounded-lg hover:bg-slate-100'>
           Sign Out
         </span>
       </div>
+      <p className='text-red-700 pt-5 text-sm px-7'>
+        {error && 'Something went wrong!'}
+      </p>
+      <p className='text-green-700 pt-5 text-sm px-7'>
+        {updateSuccess && 'Successfully updated your profile!'}
+      </p>
     </div>
   );
 }
