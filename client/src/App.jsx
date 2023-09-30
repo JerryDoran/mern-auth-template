@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/home';
-import AboutPage from './pages/About';
+import AboutPage from './pages/about';
 import SignInPage from './pages/signin';
 import SignUpPage from './pages/signup';
 import ProfilePage from './pages/profile';
