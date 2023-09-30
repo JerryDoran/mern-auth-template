@@ -1,5 +1,5 @@
 import { errorHandler } from '../lib/error.js';
-import User from '../models/userModel.js';
+import User from '../models/User.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 

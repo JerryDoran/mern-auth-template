@@ -1,6 +1,6 @@
 import { errorHandler } from '../lib/error.js';
 import bcryptjs from 'bcryptjs';
-import User from '../models/userModel.js';
+import User from '../models/User.js';
 
 export function getUser(req, res) {
   res.json({ message: 'User route is working' });
