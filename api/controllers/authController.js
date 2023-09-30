@@ -98,3 +98,10 @@ export async function signUpWithGoogle(req, res, next) {
     next(error);
   }
 }
+
+export function signOut(req, res) {
+  res
+    .clearCookie('access_token')
+    .status(200)
+    .json({ message: 'Signout success' });
+}
